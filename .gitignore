@@ -25,7 +25,5 @@ replay_pid*
 
 #Exclusiones aparte
 target/
-*.env
 logs/
-.env*
 .env
