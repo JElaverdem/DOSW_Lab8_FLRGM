@@ -44,26 +44,26 @@ public class Usuario {
 
     public Long getId() { return id; }
 
-public String getNombre() { return nombre; }
-public void setNombre(String nombre) { this.nombre = nombre; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-public String getCorreo() { return correo; }
-public void setCorreo(String correo) { this.correo = correo; }
+    public String getCorreo() { return correo; }
+    public void setCorreo(String correo) { this.correo = correo; }
 
-public String getTelefono() { return telefono; }
-public void setTelefono(String telefono) { this.telefono = telefono; }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
 
-public String getPasswordHash() { return passwordHash; }
-public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-public Rol getRol() { return rol; }
-public void setRol(Rol rol) { this.rol = rol; }
+    public Rol getRol() { return rol; }
+    public void setRol(Rol rol) { this.rol = rol; }
 
-public String getOficioPrincipal() { return oficioPrincipal; }
-public void setOficioPrincipal(String oficioPrincipal) { this.oficioPrincipal = oficioPrincipal; }
+    public String getOficioPrincipal() { return oficioPrincipal; }
+    public void setOficioPrincipal(String oficioPrincipal) { this.oficioPrincipal = oficioPrincipal; }
 
-public String getZona() { return zona; }
-public void setZona(String zona) { this.zona = zona; }
+    public String getZona() { return zona; }
+    public void setZona(String zona) { this.zona = zona; }
 
-public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
 }
