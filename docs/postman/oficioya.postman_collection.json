@@ -1,0 +1,157 @@
+{
+  "info": {
+    "name": "OficioYa - Laboratorio de seguridad",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base", "value": "http://localhost:8080/api/v1" },
+    { "key": "clave", "value": "ContrasenaDemo123!" },
+    { "key": "tokenA", "value": "" },
+    { "key": "tokenB", "value": "" },
+    { "key": "idTrabajador", "value": "" },
+    { "key": "idSolicitudA", "value": "" },
+    { "key": "tokenAlterado", "value": "PEGAR_TOKEN_CON_ROLE_MODIFICADO" },
+    { "key": "tokenVencido", "value": "PEGAR_TOKEN_VENCIDO" }
+  ],
+  "item": [
+    {
+      "name": "0. Preparacion",
+      "item": [
+        {
+          "name": "0.1 Registrar trabajador",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code === 201) { pm.collectionVariables.set('idTrabajador', pm.response.json().id); }"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Trabajador Demo\",\"correo\":\"trabajador@test.com\",\"telefono\":\"3001111111\",\"password\":\"{{clave}}\",\"rol\":\"TRABAJADOR\",\"oficioPrincipal\":\"Plomero\",\"zona\":\"Chapinero\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/registro"
+          }
+        },
+        {
+          "name": "0.2 Registrar contratante A",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Contratante A\",\"correo\":\"contratante.a@test.com\",\"telefono\":\"3002222222\",\"password\":\"{{clave}}\",\"rol\":\"CONTRATANTE\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/registro"
+          }
+        },
+        {
+          "name": "0.3 Registrar contratante B",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Contratante B\",\"correo\":\"contratante.b@test.com\",\"telefono\":\"3003333333\",\"password\":\"{{clave}}\",\"rol\":\"CONTRATANTE\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/registro"
+          }
+        },
+        {
+          "name": "0.4 Login contratante A",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code === 200) { pm.collectionVariables.set('tokenA', pm.response.json().accessToken); }"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"correo\":\"contratante.a@test.com\",\"password\":\"{{clave}}\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/login"
+          }
+        },
+        {
+          "name": "0.5 Login contratante B",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code === 200) { pm.collectionVariables.set('tokenB', pm.response.json().accessToken); }"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"correo\":\"contratante.b@test.com\",\"password\":\"{{clave}}\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/login"
+          }
+        },
+        {
+          "name": "0.6 Contratante A crea una solicitud",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "if (pm.response.code === 201) { pm.collectionVariables.set('idSolicitudA', pm.response.json().id); }"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenA}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\"trabajadorId\":{{idTrabajador}},\"descripcion\":\"Gotera en el bano\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/solicitudes"
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Ataques",
+      "item": [
+        {
+          "name": "Ataque 1 - sin token (esperado 401)",
+          "request": { "method": "GET", "header": [], "url": "{{base}}/solicitudes" }
+        },
+        {
+          "name": "Ataque 2 - token con role alterado (esperado 401)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{tokenAlterado}}" }], "url": "{{base}}/solicitudes" }
+        },
+        {
+          "name": "Ataque 3 - token vencido (esperado 401)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{tokenVencido}}" }], "url": "{{base}}/solicitudes" }
+        },
+        {
+          "name": "Ataque 4 - solicitud ajena (esperado 404)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{tokenB}}" }], "url": "{{base}}/solicitudes/{{idSolicitudA}}" }
+        },
+        {
+          "name": "Ataque 5 - contratante en admin (esperado 403)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{tokenA}}" }], "url": "{{base}}/admin/usuarios" }
+        },
+        {
+          "name": "Ataque 6 - registro con rol ADMIN (esperado 400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"nombre\":\"Intruso\",\"correo\":\"intruso@test.com\",\"telefono\":\"3004444444\",\"password\":\"{{clave}}\",\"rol\":\"ADMIN\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/registro"
+          }
+        },
+        {
+          "name": "Ataque 7a - correo inexistente (esperado 401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"correo\":\"noexiste@test.com\",\"password\":\"{{clave}}\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/login"
+          }
+        },
+        {
+          "name": "Ataque 7b - clave errada (mismo 401 y mensaje)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\"correo\":\"contratante.a@test.com\",\"password\":\"ClaveIncorrecta999\"}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Perfiles",
+      "item": [
+        {
+          "name": "Perfil propio (incluye contacto)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{tokenA}}" }], "url": "{{base}}/usuarios/me" }
+        },
+        {
+          "name": "Perfil publico del trabajador (sin contacto)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{tokenA}}" }], "url": "{{base}}/trabajadores/{{idTrabajador}}" }
+        }
+      ]
+    }
+  ]
+}

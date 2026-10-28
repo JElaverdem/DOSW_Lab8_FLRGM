@@ -1,0 +1,132 @@
+@base = http://localhost:8080/api/v1
+@clave = ContrasenaDemo123!
+@json = application/json
+@tokenAlterado = PEGAR_AQUI_TOKEN_CON_ROLE_MODIFICADO
+@tokenVencido = PEGAR_AQUI_TOKEN_VENCIDO
+
+### 0.1 Registrar trabajador
+# @name regTrab
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{
+  "nombre": "Trabajador Demo",
+  "correo": "trabajador@test.com",
+  "telefono": "3001111111",
+  "password": "{{clave}}",
+  "rol": "TRABAJADOR",
+  "oficioPrincipal": "Plomero",
+  "zona": "Chapinero"
+}
+
+### 0.2 Registrar contratante A
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{
+  "nombre": "Contratante A",
+  "correo": "contratante.a@test.com",
+  "telefono": "3002222222",
+  "password": "{{clave}}",
+  "rol": "CONTRATANTE"
+}
+
+### 0.3 Registrar contratante B
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{
+  "nombre": "Contratante B",
+  "correo": "contratante.b@test.com",
+  "telefono": "3003333333",
+  "password": "{{clave}}",
+  "rol": "CONTRATANTE"
+}
+
+### 0.4 Login contratante A
+# @name loginA
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{
+  "correo": "contratante.a@test.com",
+  "password": "{{clave}}"
+}
+
+### 0.5 Login contratante B
+# @name loginB
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{
+  "correo": "contratante.b@test.com",
+  "password": "{{clave}}"
+}
+
+### 0.6 Contratante A crea una solicitud para el trabajador
+# @name solA
+POST {{base}}/solicitudes
+Authorization: Bearer {{loginA.response.body.accessToken}}
+Content-Type: {{json}}
+
+{
+  "trabajadorId": {{regTrab.response.body.id}},
+  "descripcion": "Gotera en el bano"
+}
+
+### Ataque 1: /solicitudes sin token. Esperado 401
+GET {{base}}/solicitudes
+
+### Ataque 2: token con role alterado (editado en jwt.io). Esperado 401
+GET {{base}}/solicitudes
+Authorization: Bearer {{tokenAlterado}}
+
+### Ataque 3: token vencido. Esperado 401
+GET {{base}}/solicitudes
+Authorization: Bearer {{tokenVencido}}
+
+### Ataque 4: contratante B pide la solicitud de A. Esperado 404
+GET {{base}}/solicitudes/{{solA.response.body.id}}
+Authorization: Bearer {{loginB.response.body.accessToken}}
+
+### Ataque 5: contratante en /admin/usuarios. Esperado 403
+GET {{base}}/admin/usuarios
+Authorization: Bearer {{loginA.response.body.accessToken}}
+
+### Ataque 6: registro con rol ADMIN. Esperado 400
+POST {{base}}/auth/registro
+Content-Type: {{json}}
+
+{
+  "nombre": "Intruso",
+  "correo": "intruso@test.com",
+  "telefono": "3004444444",
+  "password": "{{clave}}",
+  "rol": "ADMIN"
+}
+
+### Ataque 7a: login con correo inexistente. Esperado 401
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{
+  "correo": "noexiste@test.com",
+  "password": "{{clave}}"
+}
+
+### Ataque 7b: login con correo existente y clave errada. Esperado el mismo 401 y mensaje
+POST {{base}}/auth/login
+Content-Type: {{json}}
+
+{
+  "correo": "contratante.a@test.com",
+  "password": "ClaveIncorrecta999"
+}
+
+### Extra: perfil propio (incluye contacto)
+GET {{base}}/usuarios/me
+Authorization: Bearer {{loginA.response.body.accessToken}}
+
+### Extra: perfil publico del trabajador (sin correo ni telefono)
+GET {{base}}/trabajadores/{{regTrab.response.body.id}}
+Authorization: Bearer {{loginA.response.body.accessToken}}
