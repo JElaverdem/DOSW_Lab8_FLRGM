@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.eci.dosw.oficioya.dto.LoginRequest;
+import edu.eci.dosw.oficioya.dto.LoginResponse;
 import edu.eci.dosw.oficioya.dto.RegistroRequest;
 import edu.eci.dosw.oficioya.dto.RegistroResponse;
 import edu.eci.dosw.oficioya.service.AuthService;
@@ -31,5 +33,14 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+        @Valid @RequestBody LoginRequest request
+    ){
+        LoginResponse response = authService.login(request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

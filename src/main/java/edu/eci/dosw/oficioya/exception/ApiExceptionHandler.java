@@ -36,4 +36,10 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(
                 ApiError.of(400, "Bad Request", "Cuerpo de la petición inválido", req.getRequestURI()));
     }
+
+    @ExceptionHandler(CredencialesInvalidasException.class)
+    ResponseEntity<ApiError> cuerpoIlegible(CredencialesInvalidasException ex, HttpServletRequest req) {
+        return ResponseEntity.badRequest().body(
+                ApiError.of(401, "Unauthorized", "Datos de sesión inválidos.", req.getRequestURI()));
+    }
 }
