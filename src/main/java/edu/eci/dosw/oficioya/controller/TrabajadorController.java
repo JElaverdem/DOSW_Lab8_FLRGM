@@ -21,12 +21,12 @@ public class TrabajadorController {
     }
 
     @GetMapping
-    public List<PerfilPublicoResponse> listar() {
-        return usuarioService.listarTrabajadores();
+    public List<PerfilPublicoResponse> list() {
+        return usuarioService.listWorkers();
     }
 
     @GetMapping("/{id}")
-    public PerfilPublicoResponse obtener(@PathVariable Long id) {
-        return usuarioService.obtenerTrabajador(id);
+    public PerfilPublicoResponse getById(@PathVariable Long id) {
+        return usuarioService.getWorker(id);
     }
 }
