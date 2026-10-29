@@ -1,0 +1,12 @@
+# Matriz OWASP · OficioYa (LAB-55)
+
+Estado tomado del código de `develop` (7062649). Lo marcado como **pendiente** depende de piezas de otros integrantes que aún no están mezcladas, y se actualiza cuando lleguen.
+
+| Riesgo | ¿Dónde podría ocurrir en OficioYa? | Control implementado | Prueba o evidencia |
+| --- | --- | --- | --- |
+| A01 · Control de acceso roto | Un contratante podría pedir una solicitud ajena cambiando el id, o un usuario sin rol ADMIN consultar `/admin/usuarios` | `@PreAuthorize("hasRole('ADMIN')")` en `AdminController`; `/admin/**` solo ADMIN en `SecurityConfig`; consultas por participante en `SolicitudRepository` (`findByIdAndContratanteId`, `findByIdAndTrabajadorId`). Pendiente: que el servicio de solicitudes las use | PT-11, PT-12, PT-15, ataques 4 y 5 (pendientes de ejecutar) |
+| A02 · Configuración de seguridad incorrecta | Rutas protegidas abiertas, CSRF mal justificado, secretos en el repo | Sesiones `STATELESS`, `csrf` desactivado, `/auth/**` público y `anyRequest().authenticated()`; `.env` y `target/` en `.gitignore`; variables sin valor por defecto en `application.properties`. Pendiente: prefijo `/api/v1` en las reglas y `.env.example` con `ADMIN_CORREO` | Revisión de `SecurityConfig` y `.gitignore`; pendiente PT-07 |
+| A04 · Fallas criptográficas | Contraseñas en texto plano, token falsificable, clave de firma débil | `BCryptPasswordEncoder` como bean y hash al registrar; JWT con `JWT_SECRET` por variable de entorno. Pendiente: validar HS256, longitud de clave y emisor en el filtro | PT-04, PT-08, ataque 2; evidencia de `password_hash` pendiente |
+| A05 · Inyección | Consultas armadas con texto que llega del cliente | Solo consultas derivadas de Spring Data (`findBy...`, `existsBy...`), sin `@Query` ni concatenación; validación con `@Valid` en los DTO | Revisión de `UsuarioRepository` y `SolicitudRepository` |
+| A07 · Fallas de autenticación | Enumerar usuarios por el mensaje de login, tokens alterados o vencidos | Login con la misma excepción si falla el correo o la clave (rama `feature/login`, sin mezclar). Pendiente: filtro JWT y respuesta 401 uniforme | PT-06, PT-07, PT-08, PT-09, ataques 3 y 7 (pendientes) |
+| A10 · Manejo incorrecto de condiciones excepcionales | Errores que devuelvan trazas o un 500 en vez de 403 | `@RestControllerAdvice` con formato `ApiError` y sin handler genérico de `Exception`, para no tapar `AccessDeniedException`. Pendiente: handlers 404 y 409, y entryPoint 401 / accessDenied 403 | PT-07 y respuestas reales 401/403/404 (pendientes) |
