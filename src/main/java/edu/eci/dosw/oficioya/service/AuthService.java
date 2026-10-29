@@ -6,7 +6,7 @@ import edu.eci.dosw.oficioya.dto.RegistroRequest;
 import edu.eci.dosw.oficioya.dto.RegistroResponse;
 
 /**
- * Contrato de autenticación. La implementación vive en {@link AuthServiceImpl}.
+ * Contrato de autenticación. La implementación vive en {@link AuthServiceImplementation}.
  */
 public interface AuthService {
 

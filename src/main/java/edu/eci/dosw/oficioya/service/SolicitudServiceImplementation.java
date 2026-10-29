@@ -24,12 +24,12 @@ import edu.eci.dosw.oficioya.repository.UsuarioRepository;
  * y el contexto de Spring pueda arrancar.
  */
 @Service
-public class SolicitudServiceImpl implements SolicitudService {
+public class SolicitudServiceImplementation implements SolicitudService {
 
     private final SolicitudRepository solicitudRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public SolicitudServiceImpl(SolicitudRepository solicitudRepository,
+    public SolicitudServiceImplementation(SolicitudRepository solicitudRepository,
                                 UsuarioRepository usuarioRepository) {
         this.solicitudRepository = solicitudRepository;
         this.usuarioRepository = usuarioRepository;

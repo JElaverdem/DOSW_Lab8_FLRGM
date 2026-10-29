@@ -22,7 +22,7 @@ import edu.eci.dosw.oficioya.repository.UsuarioRepository;
 import edu.eci.dosw.oficioya.security.JwtService;
 
 @Service
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImplementation implements AuthService {
 
     private static final Set<Rol> ROLES_PUBLICOS =
             EnumSet.of(Rol.TRABAJADOR, Rol.CONTRATANTE);
@@ -33,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final long ttlMinutes;
 
-    public AuthServiceImpl(UsuarioRepository usuarioRepository,
+    public AuthServiceImplementation(UsuarioRepository usuarioRepository,
                            PasswordEncoder passwordEncoder,
                            UsuarioMapper mapper,
                            JwtService jwtService,

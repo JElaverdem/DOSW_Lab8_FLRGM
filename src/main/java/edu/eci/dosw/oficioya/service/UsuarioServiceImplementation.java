@@ -14,12 +14,12 @@ import edu.eci.dosw.oficioya.mapper.UsuarioMapper;
 import edu.eci.dosw.oficioya.repository.UsuarioRepository;
 
 @Service
-public class UsuarioServiceImpl implements UsuarioService {
+public class UsuarioServiceImplementation implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper mapper;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, UsuarioMapper mapper) {
+    public UsuarioServiceImplementation(UsuarioRepository usuarioRepository, UsuarioMapper mapper) {
         this.usuarioRepository = usuarioRepository;
         this.mapper = mapper;
     }
