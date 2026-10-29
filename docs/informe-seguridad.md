@@ -1,0 +1,9 @@
+# Informe de seguridad · OficioYa
+
+## Preguntas 1 a 3
+
+**1. Codificar, cifrar y hashear.** Las contraseñas se hashean con BCrypt: el bean `BCryptPasswordEncoder` está en `SecurityConfig` y se usa con `encode` en `AuthService.registrar` y en `AdminSeeder`. Se hashea y no se cifra porque el servidor nunca necesita recuperar la contraseña, solo compararla en el login con `matches`. Un cifrado se revierte con la clave y un hash no, y BCrypt usa sal y es lento a propósito. Codificar aparece en el JWT, cuyas partes van en Base64URL y se leen sin clave. Cifrar no lo usamos en ningún punto del código. **[PENDIENTE: confirmar Base64 y firma HS256 cuando `JwtService` esté en develop; el login con `matches` está en `feature/login`, sin mezclar.]**
+
+**2. Payload del token.** Según el diseño del lab, el payload lleva `sub` (correo), `role`, `iss`, `iat` y `exp`, y no lleva contraseña ni teléfono. **[PENDIENTE: pegar el payload real decodificado en jwt.io, sin el token completo.]** Si se cambia `role` a `ADMIN`, el servidor lo detecta porque la firma HS256 se calcula sobre el header y el payload con `JWT_SECRET`: al alterar el payload la firma deja de coincidir, y quien edita el token no tiene la clave para recalcularla. La respuesta esperada es 401. **[PENDIENTE: resultado real del ataque 2.]**
+
+**3. 401, 403 y 404.** Ejemplos esperados: 401 al pedir `/solicitudes` sin token; 403 cuando un contratante llama a `/admin/usuarios`, porque se sabe quién es pero su rol no alcanza; 404 cuando un usuario pide una solicitud de otro. **[PENDIENTE: respuestas reales de cada caso cuando la app arranque.]** Una solicitud ajena responde 404 y no 403 porque un 403 confirmaría que esa solicitud existe. Como la consulta incluye al participante, una ajena y una inexistente dan la misma respuesta.
