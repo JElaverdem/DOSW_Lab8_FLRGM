@@ -15,7 +15,7 @@ import edu.eci.dosw.oficioya.service.AuthService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping({"/api/v1/auth", "/auth"})
 public class AuthController {
 
     private final AuthService authService;
