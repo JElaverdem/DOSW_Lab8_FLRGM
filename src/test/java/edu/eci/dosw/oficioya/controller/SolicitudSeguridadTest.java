@@ -66,7 +66,7 @@ class SolicitudSeguridadTest {
             {"trabajadorId": %d, "descripcion": "Arreglar una fuga"}
             """.formatted(trabajador2.getId());
  
-        mvc.perform(post("/solicitudes").with(csrf())
+        mvc.perform(post("/api/v1/solicitudes").with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content(body))
            .andExpect(status().isForbidden());
  
@@ -82,7 +82,7 @@ class SolicitudSeguridadTest {
         solicitud(contratante1, trabajador2);
         Solicitud ajena = solicitud(contratante2, trabajador1);
  
-        mvc.perform(get("/solicitudes"))
+        mvc.perform(get("/api/v1/solicitudes"))
            .andExpect(status().isOk())
            .andExpect(jsonPath("$.length()").value(2))
            .andExpect(jsonPath("$[?(@.id == " + ajena.getId() + ")]").isEmpty());
@@ -95,7 +95,7 @@ class SolicitudSeguridadTest {
     void pt15_consultarAjenaDa404() throws Exception {
         Solicitud ajena = solicitud(contratante2, trabajador1);
  
-        mvc.perform(get("/solicitudes/{id}", ajena.getId()))
+        mvc.perform(get("/api/v1/solicitudes/{id}", ajena.getId()))
            .andExpect(status().isNotFound());
     }
  
@@ -105,7 +105,7 @@ class SolicitudSeguridadTest {
     void pt15_cancelarAjenaDa404SinCambios() throws Exception {
         Solicitud ajena = solicitud(contratante2, trabajador1);
  
-        mvc.perform(patch("/solicitudes/{id}/cancelar", ajena.getId()).with(csrf()))
+        mvc.perform(patch("/api/v1/solicitudes/{id}/cancelar", ajena.getId()).with(csrf()))
            .andExpect(status().isNotFound());
  
         assertEquals(EstadoSolicitud.PENDIENTE, estadoEnBase(ajena));
@@ -118,7 +118,7 @@ class SolicitudSeguridadTest {
     void pt16_aceptarConTrabajadorNoAsignadoDa404() throws Exception {
         Solicitud s = solicitud(contratante1, trabajador1); // asignada a T1, no a T2
  
-        mvc.perform(patch("/solicitudes/{id}/aceptar", s.getId()).with(csrf()))
+        mvc.perform(patch("/api/v1/solicitudes/{id}/aceptar", s.getId()).with(csrf()))
            .andExpect(status().isNotFound());
  
         assertEquals(EstadoSolicitud.PENDIENTE, estadoEnBase(s));
@@ -130,7 +130,7 @@ class SolicitudSeguridadTest {
     void pt16_aceptarConContratanteDa403() throws Exception {
         Solicitud s = solicitud(contratante1, trabajador1);
  
-        mvc.perform(patch("/solicitudes/{id}/aceptar", s.getId()).with(csrf()))
+        mvc.perform(patch("/api/v1/solicitudes/{id}/aceptar", s.getId()).with(csrf()))
            .andExpect(status().isForbidden());
  
         assertEquals(EstadoSolicitud.PENDIENTE, estadoEnBase(s));
@@ -141,7 +141,7 @@ class SolicitudSeguridadTest {
     @DisplayName("PT-17: un ADMIN no puede consultar /solicitudes (403)")
     @WithMockUser(username = "admin@test.com", roles = "ADMIN")
     void pt17_adminNoConsultaSolicitudes() throws Exception {
-        mvc.perform(get("/solicitudes"))
+        mvc.perform(get("/api/v1/solicitudes"))
            .andExpect(status().isForbidden());
     }
  
@@ -169,4 +169,3 @@ class SolicitudSeguridadTest {
         return solicitudes.findById(s.getId()).orElseThrow().getEstado();
     }
 }
- 
