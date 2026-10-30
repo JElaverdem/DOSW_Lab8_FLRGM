@@ -1,4 +1,4 @@
-# Matriz de acceso e informe (preguntas 4 a 6) · OficioYa (LAB-60)
+# Matriz de acceso · OficioYa (LAB-56)
 
 ## 1. Matriz de acceso
 
@@ -7,23 +7,24 @@ Todas las rutas protegidas responden **401** si no hay token o el token es invá
 
 | # | Endpoint | Roles permitidos | Regla de propiedad / datos ocultos | Código de error |
 | --- | --- | --- | --- | --- |
-| 1 | `POST /auth/registro` | Público | Solo se aceptan los roles `TRABAJADOR` y `CONTRATANTE`; nunca `ADMIN`. La respuesta no incluye contraseña ni hash. | 400 (rol no permitido o datos inválidos), 409 (correo duplicado) |
-| 2 | `POST /auth/login` | Público | Mismo mensaje si el correo no existe o la clave es incorrecta (evita enumerar usuarios). | 401 |
-| 3 | `GET /usuarios/me` | Autenticado | Solo devuelve los datos del usuario del token, incluido su contacto. | 401 |
-| 4 | `GET /trabajadores/{id}` | Autenticado | Perfil público: no incluye correo ni teléfono. | 401, 404 (id inexistente) |
-| 5 | `GET /admin/usuarios` | `ADMIN` | Es el único endpoint que devuelve el contacto de otros usuarios. | 401, 403 (rol distinto de ADMIN) |
-| 6 | `POST /solicitudes` | `CONTRATANTE` | El contratante sale del token, no del cuerpo. Estado inicial `PENDIENTE`. | 400 (datos inválidos), 401, 403 (TRABAJADOR o ADMIN) |
-| 7 | `GET /solicitudes` | `CONTRATANTE`, `TRABAJADOR` | Solo lista las solicitudes donde el usuario participa. | 401, 403 (ADMIN) |
-| 8 | `GET /solicitudes/{id}` | `CONTRATANTE`, `TRABAJADOR` | Solo si el usuario participa; una solicitud ajena responde igual que una inexistente. | 401, 403 (ADMIN), 404 (ajena o inexistente) |
-| 9 | `PATCH /solicitudes/{id}/aceptar` | `TRABAJADOR` | Solo el trabajador asignado y solo desde `PENDIENTE`. | 401, 403 (CONTRATANTE o ADMIN), 404 (no asignado o inexistente), 409 (estado inválido) |
-| 10 | `PATCH /solicitudes/{id}/cancelar` | `CONTRATANTE` | Solo el contratante autor, desde `PENDIENTE` o `ACEPTADA`. | 401, 403 (TRABAJADOR o ADMIN), 404 (ajena o inexistente), 409 (estado inválido) |
+| 1 | `POST /api/v1/auth/registro` | Público | Solo se aceptan los roles `TRABAJADOR` y `CONTRATANTE`; nunca `ADMIN`. La respuesta no incluye contraseña ni hash. | 400 (rol no permitido o datos inválidos), 409 (correo duplicado) |
+| 2 | `POST /api/v1/auth/login` | Público | Mismo mensaje si el correo no existe o la clave es incorrecta (evita enumerar usuarios). | 401 |
+| 3 | `GET /api/v1/usuarios/me` | Autenticado | Solo devuelve los datos del usuario del token, incluido su contacto. | 401 |
+| 4 | `GET /api/v1/trabajadores` | Autenticado | Listado público: no incluye correo ni teléfono. | 401 |
+| 5 | `GET /api/v1/trabajadores/{id}` | Autenticado | Perfil público: no incluye correo ni teléfono. | 401, 404 (id inexistente o rol distinto de TRABAJADOR) |
+| 6 | `GET /api/v1/admin/usuarios` | `ADMIN` | Es el único endpoint que devuelve el contacto de otros usuarios. | 401, 403 (rol distinto de ADMIN) |
+| 7 | `POST /api/v1/solicitudes` | `CONTRATANTE` | El contratante sale del token, no del cuerpo. Estado inicial `PENDIENTE`. | 400 (datos inválidos), 401, 403 (TRABAJADOR o ADMIN) |
+| 8 | `GET /api/v1/solicitudes` | `CONTRATANTE`, `TRABAJADOR` | Solo lista las solicitudes donde el usuario participa. | 401, 403 (ADMIN) |
+| 9 | `GET /api/v1/solicitudes/{id}` | `CONTRATANTE`, `TRABAJADOR` | Solo si el usuario participa; una solicitud ajena responde igual que una inexistente. | 401, 403 (ADMIN), 404 (ajena o inexistente) |
+| 10 | `PATCH /api/v1/solicitudes/{id}/aceptar` | `TRABAJADOR` | Solo el trabajador asignado y solo desde `PENDIENTE`. | 401, 403 (CONTRATANTE o ADMIN), 404 (no asignado o inexistente), 409 (estado inválido) |
+| 11 | `PATCH /api/v1/solicitudes/{id}/rechazar` | `TRABAJADOR` | Solo el trabajador asignado y solo desde `PENDIENTE`. | 401, 403 (CONTRATANTE o ADMIN), 404 (no asignado o inexistente), 409 (estado inválido) |
+| 12 | `PATCH /api/v1/solicitudes/{id}/cancelar` | `CONTRATANTE` | Solo el contratante autor, desde `PENDIENTE` o `ACEPTADA`. | 401, 403 (TRABAJADOR o ADMIN), 404 (ajena o inexistente), 409 (estado inválido) |
 
 Notas de lectura:
 - El **403** lo produce `@PreAuthorize` cuando el rol no corresponde. El **404** lo produce el servicio cuando
   la consulta, que incluye al participante, no encuentra la solicitud. Se responde 404 y no 403 para no
   revelar que la solicitud existe.
-- Las rutas de `PATCH` y la ruta base `/solicitudes` corresponden al `SolicitudController` entregado; deben
-  alinearse con el contrato final del equipo.
+- Las rutas ya usan el prefijo `/api/v1`, igual que `SecurityConfig` y los controladores.
 
 ---
 

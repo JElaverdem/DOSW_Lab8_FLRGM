@@ -187,6 +187,7 @@ El reporte queda en `target/site/jacoco/index.html` (no se versiona).
 | Documento | Contenido |
 | --- | --- |
 | [`docs/informe-seguridad.md`](docs/informe-seguridad.md) | Informe: hashing, JWT, códigos de error, identidad desde el token, CSRF, secretos |
+| [`docs/matriz-acceso-informe.md`](docs/matriz-acceso-informe.md) | Matriz de acceso: rol y regla de propiedad por endpoint |
 | [`docs/owasp.md`](docs/owasp.md) | Matriz OWASP Top 10 aplicada al proyecto |
 | [`docs/ataques.md`](docs/ataques.md) | Ataques manuales con resultado real y evidencia |
 | [`docs/evidence/`](docs/evidence) | Capturas de soporte |
