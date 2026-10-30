@@ -81,3 +81,13 @@ funcionando hasta su `exp`. Las mitigaciones del proyecto y las posibles mejoras
 - Usar en la base de datos un usuario con los privilegios mínimos, no el administrador.
 - No registrar tokens, contraseñas ni cuerpos de petición en los logs, y mantener mensajes de error genéricos.
 - Considerar límites de intentos de login (rate limiting) y un procedimiento para crear el primer `ADMIN` fuera del perfil `dev`.
+
+---
+
+## 3. Arquitectura JWT en el proyecto
+
+En OficioYa, el JWT lo **emite** `JwtService` (bloque 3, paquete `security`) al hacer login, y lo **validan**
+`JwtAuthenticationFilter` y `JwtService.validar` en cada petición protegida (bloque 4). La clave de firma no está
+en el repositorio: llega por la variable de entorno `JWT_SECRET`, que `application.properties` lee sin valor por defecto
+(`${JWT_SECRET}`). `.env.example` documenta la variable sin valor y `.env` está en `.gitignore`. Así la clave se comparte
+entre entornos sin versionarse.
