@@ -30,13 +30,21 @@ public class JwtService {
     }
 
     public String generar(String correo, String rol) {
+        return generar(correo, rol, ttlMinutes);
+    }
+
+    /**
+     * Generates a token with a custom time to live, in minutes.
+     * A negative value produces an already expired token, which PT-09 uses.
+     */
+    public String generar(String correo, String rol, long ttl) {
         Instant ahora = Instant.now();
         return Jwts.builder()
                 .subject(correo)
                 .claim("role", rol)
                 .issuer(issuer)
                 .issuedAt(Date.from(ahora))
-                .expiration(Date.from(ahora.plus(ttlMinutes, ChronoUnit.MINUTES)))
+                .expiration(Date.from(ahora.plus(ttl, ChronoUnit.MINUTES)))
                 .signWith(key, Jwts.SIG.HS256)   // fija HS256 sin importar el largo de la clave
                 .compact();
     }
