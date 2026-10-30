@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
  *  - Always DTOs, never JPA entities.
  */
 @RestController
-@RequestMapping("/solicitudes")
+@RequestMapping("/api/v1/solicitudes")
 public class SolicitudController {
 
     private final SolicitudService solicitudService;
