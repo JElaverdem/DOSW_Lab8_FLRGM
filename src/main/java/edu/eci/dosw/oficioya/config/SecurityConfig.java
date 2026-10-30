@@ -6,7 +6,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import edu.eci.dosw.oficioya.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -18,16 +23,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain chain(HttpSecurity http)
-            throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http,
+                                    JwtAuthenticationFilter jwtFilter,
+                                    AuthenticationEntryPoint entryPoint,
+                                    AccessDeniedHandler deniedHandler) throws Exception {
         return http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(s -> s.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**", "/auth/**").permitAll()
-                .requestMatchers("/api/v1/admin/**", "/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated())
-            .build();
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint(entryPoint)      // 401
+                        .accessDeniedHandler(deniedHandler))        // 403
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 }
