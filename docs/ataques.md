@@ -3,8 +3,6 @@
 Pruebas manuales contra la API en ejecución. Cada ataque indica la petición, el resultado esperado
 y un espacio para el resultado real y la evidencia.
 
-> No pegues tokens completos ni contraseñas reales en este archivo. Usa los marcadores `<TOKEN_...>`
-> y guarda las capturas en `docs/evidence/` (con el token recortado).
 
 ## Preparación
 
