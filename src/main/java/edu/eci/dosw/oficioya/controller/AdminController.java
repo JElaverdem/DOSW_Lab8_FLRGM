@@ -22,7 +22,7 @@ public class AdminController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/usuarios")
-    public List<PerfilAdminResponse> listar() {
-        return usuarioService.listarParaAdmin();
+    public List<PerfilAdminResponse> list() {
+        return usuarioService.listForAdmin();
     }
 }

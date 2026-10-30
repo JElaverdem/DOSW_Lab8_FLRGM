@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.eci.dosw.oficioya.dto.LoginRequest;
 import edu.eci.dosw.oficioya.dto.LoginResponse;
@@ -20,46 +21,75 @@ import edu.eci.dosw.oficioya.mapper.UsuarioMapper;
 import edu.eci.dosw.oficioya.repository.UsuarioRepository;
 import edu.eci.dosw.oficioya.security.JwtService;
 
-@Service 
+/**
+ * Authentication service: registration and login.
+ */
+@Service
 public class AuthService {
+
+    private static final Set<Rol> PUBLIC_ROLES =
+            EnumSet.of(Rol.TRABAJADOR, Rol.CONTRATANTE);
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioMapper mapper;
     private final JwtService jwtService;
-    private final Long ttlMinutes;
+    private final long ttlMinutes;
 
-    private static final Set<Rol> ROLES_PUBLICOS =
-        EnumSet.of(Rol.TRABAJADOR, Rol.CONTRATANTE);
-
-    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, UsuarioMapper usuarioMapper, JwtService jwtService,@Value("${app.jwt.ttl-minutes}") long ttlMinutes){
+    public AuthService(UsuarioRepository usuarioRepository,
+                       PasswordEncoder passwordEncoder,
+                       UsuarioMapper mapper,
+                       JwtService jwtService,
+                       @Value("${app.jwt.ttl-minutes}") long ttlMinutes) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mapper = usuarioMapper;
+        this.mapper = mapper;
         this.jwtService = jwtService;
         this.ttlMinutes = ttlMinutes;
     }
 
-    public RegistroResponse registrar(RegistroRequest req) {
-    if (!ROLES_PUBLICOS.contains(req.rol())) {
-        throw new RolNoPermitidoException("Rol no permitido en el registro");   // 400
-    }
-    String correo = req.correo().trim().toLowerCase();
-    if (usuarioRepository.existsByCorreo(correo)) {
-        throw new CorreoDuplicadoException(correo);                            // 409
-    }
-    Usuario u = new Usuario();
-    u.setNombre(req.nombre());
-    u.setCorreo(correo);
-    u.setPasswordHash(passwordEncoder.encode(req.password()));
-    u.setRol(req.rol());                         // el cliente propone; el servidor solo acepta roles públicos
-    return mapper.toResponse(usuarioRepository.save(u));
-}
+    /**
+     * Registers a public user (worker or contractor).
+     */
+    @Transactional
+    public RegistroResponse register(RegistroRequest request) {
+        if (!PUBLIC_ROLES.contains(request.rol())) {
+            throw new RolNoPermitidoException("Rol no permitido en el registro");
+        }
 
-    public LoginResponse login(LoginRequest req) {
-    Usuario u = usuarioRepository.findByCorreo(req.correo().trim().toLowerCase())
-            .filter(x -> passwordEncoder.matches(req.password(), x.getPasswordHash()))
-            .orElseThrow(CredencialesInvalidasException::new);   // mismo error si falla el correo o la clave
-    String token = jwtService.generar(u.getCorreo(), u.getRol().name());
-    return new LoginResponse("Bearer", token, ttlMinutes * 60);
-}
+        String email = request.correo().trim().toLowerCase();
+        if (usuarioRepository.existsByCorreo(email)) {
+            throw new CorreoDuplicadoException(email);
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.nombre().trim());
+        usuario.setCorreo(email);
+        usuario.setTelefono(request.telefono().trim());
+        usuario.setPasswordHash(passwordEncoder.encode(request.password()));
+        usuario.setRol(request.rol());
+
+        // Trade and zone only apply to workers.
+        if (request.rol() == Rol.TRABAJADOR) {
+            usuario.setOficioPrincipal(request.oficioPrincipal());
+            usuario.setZona(request.zona());
+        }
+
+        return mapper.toResponse(usuarioRepository.save(usuario));
+    }
+
+    /**
+     * Validates credentials and issues a bearer token.
+     */
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        String email = request.correo().trim().toLowerCase();
+
+        Usuario usuario = usuarioRepository.findByCorreo(email)
+                .filter(u -> passwordEncoder.matches(request.password(), u.getPasswordHash()))
+                .orElseThrow(CredencialesInvalidasException::new);
+
+        String token = jwtService.generar(usuario.getCorreo(), usuario.getRol().name());
+        return new LoginResponse("Bearer", token, ttlMinutes * 60);
+    }
 }

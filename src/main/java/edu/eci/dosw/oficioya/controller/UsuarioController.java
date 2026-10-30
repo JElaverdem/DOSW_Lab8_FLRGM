@@ -19,7 +19,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/me")
-    public UsuarioMeResponse me(Authentication authentication) {
-        return usuarioService.me(authentication.getName());
+    public UsuarioMeResponse getCurrentUser(Authentication authentication) {
+        return usuarioService.getCurrentUser(authentication.getName());
     }
 }

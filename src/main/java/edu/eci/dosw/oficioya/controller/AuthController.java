@@ -15,7 +15,7 @@ import edu.eci.dosw.oficioya.service.AuthService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping({"/api/v1/auth", "/auth"})
 public class AuthController {
 
     private final AuthService authService;
@@ -25,11 +25,10 @@ public class AuthController {
     }
 
     @PostMapping("/registro")
-    public ResponseEntity<RegistroResponse> registrar(
+    public ResponseEntity<RegistroResponse> register(
             @Valid @RequestBody RegistroRequest request) {
 
-        RegistroResponse response =
-            authService.registrar(request);
+        RegistroResponse response = authService.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(response);
@@ -37,8 +36,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
-        @Valid @RequestBody LoginRequest request
-    ){
+            @Valid @RequestBody LoginRequest request) {
+
         LoginResponse response = authService.login(request);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

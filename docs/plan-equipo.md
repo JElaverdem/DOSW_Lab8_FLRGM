@@ -71,7 +71,7 @@ Nada de lo que ellos escriben es usado por el código de los demás.**
 
 Reglas para Santiago y Diego:
 
-1. Consumen las interfaces y DTOs congelados; **no los modifican**.
+1. Consumen los servicios y DTOs congelados; **no los modifican**.
 2. Si necesitan un campo nuevo o un método nuevo, lo piden por el chat/PR; no lo agregan por su cuenta.
 3. No tocan `SecurityConfig`, `pom.xml` ni entidades.
 4. No devuelven entidades JPA: siempre DTOs.
@@ -89,8 +89,8 @@ Reglas para Santiago y Diego:
 | `ApiError` y excepciones propias | Juan Esteban | `dto/ApiError`, `exception/*` | 0:50 |
 | DTOs de auth y usuarios | Juan José | `dto/*` | 0:50 |
 | DTOs de solicitudes | Brian | `dto/Solicitud*` | 0:50 |
-| Interfaces `AuthService` y `UsuarioService` | Juan José | `service/*` | 0:40 |
-| Interfaz `SolicitudService` | Brian | `service/SolicitudService` | 0:40 |
+| Servicios `AuthService` y `UsuarioService` (clases `@Service`) | Juan José | `service/*` | 0:40 |
+| Servicio `SolicitudService` (clase `@Service`) | Brian | `service/SolicitudService` | 0:40 |
 | `SecurityConfig` base + `PasswordEncoder` | Brian | `config/SecurityConfig` | 0:50 |
 | `JwtService` completo | Brian | `security/JwtService` | 0:50 |
 | Perfil `test` con H2 | Juan Esteban | `src/test/resources/application-test.properties` | 0:50 |
@@ -166,7 +166,7 @@ Decisión congelada: `telefono` en `Usuario` queda **nullable en la entidad** y 
 | `ApiError` y excepciones propias | `dto/ApiError`, `exception/**` |
 | Perfil `test` con H2 | `application-test.properties` |
 | Contenedor PostgreSQL y `.env` local | Docker + `.env` |
-| `SolicitudServiceImpl` (propiedad + estados) | `service/SolicitudServiceImpl` |
+| `SolicitudService` (propiedad + estados) | `service/SolicitudService` |
 | README | `README.md` |
 | Apoyo a PT-14 a PT-16 | `src/test/**` |
 
@@ -180,9 +180,8 @@ Decisión congelada: `telefono` en `Usuario` queda **nullable en la entidad** y 
 | Qué | Dónde |
 | --- | --- |
 | DTOs de auth y usuarios | `dto/**` |
-| Interfaces `AuthService` y `UsuarioService` | `service/**` |
-| `AuthServiceImpl` (registro y login) | `service/AuthServiceImpl` |
-| `UsuarioServiceImpl` (`/me`, trabajadores, admin) | `service/UsuarioServiceImpl` |
+| `AuthService` (registro y login) | `service/AuthService` |
+| `UsuarioService` (`/me`, trabajadores, admin) | `service/UsuarioService` |
 | Mappers de usuarios | `mapper/**` |
 | Advice completo (400/401/403/404/409) | `exception/ApiExceptionHandler` |
 | Pruebas PT-01 a PT-06 | `src/test/**` |
@@ -198,7 +197,7 @@ Decisión congelada: `telefono` en `Usuario` queda **nullable en la entidad** y 
 | --- | --- |
 | Mergear setup, `.gitignore`, `.env.example`, orden del `pom` | raíz |
 | DTOs de solicitudes | `dto/Solicitud*` |
-| Interfaz `SolicitudService` | `service/SolicitudService` |
+| `SolicitudService` (clase `@Service`) | `service/SolicitudService` |
 | `SecurityConfig` base y final | `config/SecurityConfig` |
 | `JwtService` | `security/JwtService` |
 | `JwtAuthenticationFilter` | `security/JwtAuthenticationFilter` |
@@ -224,7 +223,7 @@ Decisión congelada: `telefono` en `Usuario` queda **nullable en la entidad** y 
 | Ataques 3, 5 y 6 + evidencias | `docs/ataques.md`, `docs/evidence/**` |
 | Matriz OWASP + preguntas 1 a 3 | `docs/owasp.md`, `docs/informe-seguridad.md` |
 
-**Depende de:** solo DTOs/interfaces congelados (0:50) y servicios de Juan José (integración 2:30).
+**Depende de:** solo DTOs congelados (0:50) y servicios de Juan José (integración 2:30).
 **Nadie depende de Santiago:** los controladores son la capa más externa.
 
 ### Diego Mesa · capa web de solicitudes + ataques y documentación
@@ -240,7 +239,7 @@ Decisión congelada: `telefono` en `Usuario` queda **nullable en la entidad** y 
 | `.http` y colección Postman | `docs/http/oficioya.http` |
 | Matriz de acceso + preguntas 4 a 6 | `docs/matriz-acceso.md`, `docs/informe-seguridad.md` |
 
-**Depende de:** interfaz `SolicitudService` congelada (0:40) y su implementación (Juan Esteban, 2:30).
+**Depende de:** el contrato de `SolicitudService` congelado (0:40) y su implementación (Juan Esteban, 2:30).
 **Nadie depende de Diego:** igual que Santiago, su código es hoja del grafo de dependencias.
 
 ---
@@ -293,9 +292,9 @@ Decisión congelada: `telefono` en `Usuario` queda **nullable en la entidad** y 
 | Hora | Juan Esteban | Juan José | Brian | Santiago | Diego |
 | --- | --- | --- | --- | --- | --- |
 | 0:00–0:20 | Congela entidades y repos | Congela DTOs de auth | Congela DTOs de solicitudes y JWT | Lee contrato, arma docs | Arma `.http` |
-| 0:20–1:00 | Entidades, repos, `ApiError`, H2 | DTOs, interfaces, arranca auth | Setup, `SecurityConfig`, `JwtService` | Esqueletos de controladores | Esqueleto de `SolicitudController` |
+| 0:20–1:00 | Entidades, repos, `ApiError`, H2 | DTOs, servicios, arranca auth | Setup, `SecurityConfig`, `JwtService` | Esqueletos de controladores | Esqueleto de `SolicitudController` |
 | 1:00–1:15 | PR base | Rebase | PR setup | Rebase | Rebase |
-| 1:15–2:30 | `SolicitudServiceImpl` + `.env`/Docker | Auth + perfiles + PT-01..06 | Filtro + handlers + PT-07..09 | 4 controladores + `AdminSeeder` | `SolicitudController` + PT-13/14/15/16/17 |
+| 1:15–2:30 | `SolicitudService` + `.env`/Docker | Auth + perfiles + PT-01..06 | Filtro + handlers + PT-07..09 | 4 controladores + `AdminSeeder` | `SolicitudController` + PT-13/14/15/16/17 |
 | 2:30–3:00 | PR requests-core | PR auth | PR security | PR web | PR requests-api |
 | 3:00–3:20 | Corrige | Corrige | Corrige | Corrige | Corrige |
 | 3:20–4:15 | Apoyo PT-14..16 | Apoyo | Apoyo tokens | Ataques 3, 5, 6 + evidencias | Ataques 1, 2, 4, 7 |
@@ -335,8 +334,8 @@ Cada integrante revisa al menos un PR:
 
 ## 7. Cómo evitar bloqueos
 
-1. A las 0:50 las interfaces y DTOs están en `develop`; desde ahí Santiago y Diego compilan contra
-   el contrato aunque los servicios todavía no existan.
+1. A las 0:50 los DTOs y los servicios (clases `@Service`) están en `develop`; desde ahí Santiago y Diego
+   compilan contra el contrato aunque la lógica todavía no esté completa.
 2. Santiago y Diego **no esperan** implementaciones: escriben controladores y pruebas primero; las
    corren cuando los servicios estén mergeados (2:30).
 3. Si un servicio no está listo, se puede levantar la app con una implementación temporal en la rama
@@ -499,24 +498,24 @@ sesión y el martes se prueba todo. Cualquier fallo del martes mata la entrega d
 | LAB-22 | `ApiError` y excepciones propias | Juan Esteban | — | `feature/persistence` |
 | LAB-23 | DTOs de auth y usuarios | Juan José | — | `feature/auth-registration` |
 | LAB-24 | DTOs de solicitudes | Brian | — | `feature/jwt` |
-| LAB-25 | Interfaces `AuthService` y `UsuarioService` | Juan José | LAB-23 | `feature/auth-registration` |
-| LAB-26 | Interfaz `SolicitudService` | Brian | LAB-24 | `feature/jwt` |
+| LAB-25 | Servicios `AuthService` y `UsuarioService` (clases `@Service`) | Juan José | LAB-23 | `feature/auth-registration` |
+| LAB-26 | Servicio `SolicitudService` (clase `@Service`) | Brian | LAB-24 | `feature/jwt` |
 | LAB-27 | `SecurityConfig` base + `PasswordEncoder` | Brian | — | `feature/security-config` |
 | LAB-28 | `JwtService` (generar y validar) | Brian | — | `feature/jwt` |
 | LAB-29 | `application-test.properties` con H2 | Juan Esteban | — | `feature/persistence` |
 | LAB-30 | Esqueletos de controladores de cuentas/perfiles | Santiago | LAB-23, LAB-25 | `feature/web-accounts` |
 | LAB-31 | Esqueleto de `SolicitudController` | Diego | LAB-24, LAB-26 | `feature/requests-api` |
 | LAB-32 | Carpetas de docs, `.http` y colección Postman | Santiago / Diego | — | `feature/docs` |
-| LAB-33 | `AuthServiceImpl.registrar` (BCrypt, 409, roles públicos) | Juan José | LAB-20, LAB-21, LAB-23 | `feature/auth-registration` |
-| LAB-34 | `AuthServiceImpl.login` (matches + mensaje genérico) | Juan José | LAB-28, LAB-33 | `feature/auth-login` |
-| LAB-35 | `UsuarioServiceImpl` (`/me`, trabajadores, admin) | Juan José | LAB-20, LAB-21, LAB-23 | `feature/auth-login` |
+| LAB-33 | `AuthService.register` (BCrypt, 409, roles públicos) | Juan José | LAB-20, LAB-21, LAB-23 | `feature/auth-registration` |
+| LAB-34 | `AuthService.login` (matches + mensaje genérico) | Juan José | LAB-28, LAB-33 | `feature/auth-login` |
+| LAB-35 | `UsuarioService` (`/me`, trabajadores, admin) | Juan José | LAB-20, LAB-21, LAB-23 | `feature/auth-login` |
 | LAB-36 | Mappers de usuarios | Juan José | LAB-23 | `feature/auth-login` |
 | LAB-37 | `@RestControllerAdvice` completo (400/401/403/404/409) | Juan José | LAB-22 | `feature/auth-registration` |
 | LAB-38 | `JwtAuthenticationFilter` | Brian | LAB-28, LAB-27 | `feature/security-config` |
 | LAB-39 | EntryPoint `401` y AccessDeniedHandler `403` | Brian | LAB-27 | `feature/security-config` |
 | LAB-40 | `SecurityConfig` final: stateless, reglas, filtro | Brian | LAB-27, LAB-38, LAB-39 | `feature/security-config` |
-| LAB-41 | `SolicitudServiceImpl`: crear, listar y obtener con propiedad | Juan Esteban | LAB-20, LAB-21, LAB-26 | `feature/requests-core` |
-| LAB-42 | `SolicitudServiceImpl`: aceptar, rechazar, cancelar y `409` | Juan Esteban | LAB-41 | `feature/requests-core` |
+| LAB-41 | `SolicitudService`: crear, listar y obtener con propiedad | Juan Esteban | LAB-20, LAB-21, LAB-26 | `feature/requests-core` |
+| LAB-42 | `SolicitudService`: aceptar, rechazar, cancelar y `409` | Juan Esteban | LAB-41 | `feature/requests-core` |
 | LAB-43 | `AuthController` (registro `201`, login `200`) | Santiago | LAB-25, LAB-30 | `feature/web-accounts` |
 | LAB-44 | `UsuarioController`, `TrabajadorController`, `AdminController` | Santiago | LAB-25, LAB-30 | `feature/profiles-admin` |
 | LAB-45 | `AdminSeeder` solo perfil `dev` | Santiago | LAB-20, LAB-21, LAB-27 | `feature/profiles-admin` |
@@ -563,8 +562,8 @@ después y el cierre pasa al viernes 30.
 | LAB-22 · `ApiError` y excepciones | Juan Esteban | Lun 26-oct |
 | LAB-23 · DTOs de auth y usuarios | Juan José | Lun 26-oct |
 | LAB-24 · DTOs de solicitudes | Brian | Lun 26-oct |
-| LAB-25 · Interfaces de auth y usuarios | Juan José | Lun 26-oct |
-| LAB-26 · Interfaz `SolicitudService` | Brian | Lun 26-oct |
+| LAB-25 · Servicios de auth y usuarios | Juan José | Lun 26-oct |
+| LAB-26 · Servicio `SolicitudService` | Brian | Lun 26-oct |
 | LAB-27 · `SecurityConfig` base + `PasswordEncoder` | Brian | Lun 26-oct |
 | LAB-28 · `JwtService` | Brian | Lun 26-oct |
 | LAB-29 · Perfil `test` con H2 | Juan Esteban | Lun 26-oct |
@@ -573,7 +572,7 @@ después y el cierre pasa al viernes 30.
 | LAB-32 · Docs, `.http` y Postman | Santiago y Diego | Lun 26-oct |
 | LAB-33 · Registro con BCrypt | Juan José | Lun 26-oct |
 | LAB-34 · Login con mensaje genérico | Juan José | Lun 26-oct |
-| LAB-35 · `UsuarioServiceImpl` | Juan José | Lun 26-oct |
+| LAB-35 · `UsuarioService` | Juan José | Lun 26-oct |
 | LAB-36 · Mappers de usuarios | Juan José | Lun 26-oct |
 | LAB-37 · Advice completo | Juan José | Lun 26-oct |
 | LAB-38 · `JwtAuthenticationFilter` | Brian | Lun 26-oct |
