@@ -28,6 +28,7 @@ public class AdminSeeder {
             Usuario admin = new Usuario();
             admin.setNombre("Administrador");
             admin.setCorreo(normalizado);
+            admin.setTelefono("3000000000");
             admin.setPasswordHash(encoder.encode(password));
             admin.setRol(Rol.ADMIN);
             repository.save(admin);
